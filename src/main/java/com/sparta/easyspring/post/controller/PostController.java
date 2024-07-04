@@ -74,4 +74,13 @@ public class PostController {
             .body(
                 postService.getAllFollowPost(followingId, userDetails.getUser(), page - 1, sortBy));
     }
+
+    @GetMapping("/follow/like")
+    public ResponseEntity<List<PostResponseDto>> getAllLikePost(
+        @AuthenticationPrincipal UserDetailsImpl userDetails,
+        @RequestParam(value = "page", defaultValue = "0") int page,
+        @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy) {
+
+        return postService.getAllLikePost(userDetails.getUser(), page, sortBy);
+    }
 }

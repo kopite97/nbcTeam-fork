@@ -9,11 +9,17 @@ import com.sparta.easyspring.post.dto.PostRequestDto;
 import com.sparta.easyspring.post.dto.PostResponseDto;
 import com.sparta.easyspring.post.entity.Post;
 import com.sparta.easyspring.post.repository.PostRepository;
+import com.sparta.easyspring.postlike.entity.PostLike;
+import com.sparta.easyspring.postlike.repository.PostLikeRepository;
+import java.util.ArrayList;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +33,7 @@ import static com.sparta.easyspring.exception.ErrorEnum.*;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final PostLikeRepository postLikeRepository;
     private final UserService userService;
     private final FollowService followService;
 
@@ -104,5 +111,27 @@ public class PostService {
             () -> new CustomException(POST_NOT_FOUND)
         );
         return post;
+    }
+
+    public ResponseEntity<List<PostResponseDto>> getAllLikePost(User user,int page,String sortBy) {
+
+        Sort sort = Sort.by(Direction.DESC, sortBy);
+        Pageable pageable = PageRequest.of(page, 5, sort);
+
+        Page<PostLike> postLikeList = postLikeRepository.findAllByUserId(user.getId(),pageable);
+
+        if (postLikeList.isEmpty()) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        List<Post> postList = new ArrayList<>();
+        for (PostLike postLike : postLikeList) {
+            Optional<Post> post = postRepository.findById(postLike.getPost().getId());
+            post.ifPresent(postList::add);
+        }
+
+        List<PostResponseDto> response = postList.stream().map(PostResponseDto::new).toList();
+
+        return ResponseEntity.ok(response);
     }
 }
