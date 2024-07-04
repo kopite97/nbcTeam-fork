@@ -5,15 +5,25 @@ package com.sparta.easyspring.commentlike.service;
 
 import com.sparta.easyspring.auth.entity.User;
 import com.sparta.easyspring.auth.service.UserService;
+import com.sparta.easyspring.comment.dto.CommentResponseDto;
 import com.sparta.easyspring.comment.entity.Comment;
 
+import com.sparta.easyspring.comment.repository.CommentRepository;
 import com.sparta.easyspring.commentlike.entity.CommentLike;
 
 import com.sparta.easyspring.comment.service.CommentService;
 import com.sparta.easyspring.commentlike.repository.CommentLikeRepository;
 import com.sparta.easyspring.exception.CustomException;
 import com.sparta.easyspring.exception.ErrorEnum;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CommentLikeService {
 
     private final CommentService commentService;
+    private final CommentRepository commentRepository;
     private final UserService userService;
     private final CommentLikeRepository commentLikeRepository;
 
@@ -79,5 +90,29 @@ public class CommentLikeService {
         if(!userId.equals(loginUser.getId())){
             throw new CustomException(ErrorEnum.USER_NOT_AUTHENTICATED);
         }
+    }
+
+    public ResponseEntity<List<CommentResponseDto>> getLikeComments(User user, int page, String sortBy) {
+
+        Sort sort = Sort.by(Direction.DESC, sortBy);
+        Pageable pageable = PageRequest.of(page, 5, sort);
+
+        Page<CommentLike> commentLikes = commentLikeRepository.findAllByUserId(user.getId(),pageable);
+
+        if(commentLikes.isEmpty())
+        {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        List<Comment> commentList = new ArrayList<>();
+        for (CommentLike commentLike : commentLikes) {
+            Optional<Comment> comment = commentRepository.findById(commentLike.getComment().getId());
+            comment.ifPresent(commentList::add);
+        }
+
+        List<CommentResponseDto> response = commentList.stream().map(CommentResponseDto::new)
+            .toList();
+
+        return ResponseEntity.ok(response);
     }
 }
