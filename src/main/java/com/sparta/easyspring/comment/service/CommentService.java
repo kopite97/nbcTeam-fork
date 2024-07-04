@@ -26,7 +26,8 @@ public class CommentService {
     private final PostService postService;
 
     public CommentResponseDto createNewComment(Long postId, CommentRequestDto requestDto) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
+            .getAuthentication().getPrincipal();
         User user = userDetails.getUser();
         Post post = postService.findPostbyId(postId);
 
@@ -60,10 +61,11 @@ public class CommentService {
     }
 
     private Comment getAuthorizedComment(Long commentId) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
+            .getAuthentication().getPrincipal();
         User loginUser = userDetails.getUser();
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CustomException(ErrorEnum.COMMENT_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(ErrorEnum.COMMENT_NOT_FOUND));
 
         if (!comment.getUser().getId().equals(loginUser.getId())) {
             throw new IllegalArgumentException("댓글 작성자가 아님");
@@ -73,24 +75,25 @@ public class CommentService {
 
     private CommentResponseDto entityToDto(Comment comment) {
         return new CommentResponseDto(comment.getId(), comment.getComment(), comment.getLikes(),
-                comment.getUser().getId(), comment.getPost().getId(), comment.getCreatedAt(), comment.getModifiedAt());
+            comment.getUser().getId(), comment.getPost().getId(), comment.getCreatedAt(),
+            comment.getModifiedAt());
     }
 
-    public Comment findCommentbyId(Long commentId){
+    public Comment findCommentbyId(Long commentId) {
         Comment comment = commentRepository.findById(commentId).orElseThrow(
-                ()->new IllegalArgumentException(ErrorEnum.COMMENT_NOT_FOUND.getMsg())
+            () -> new IllegalArgumentException(ErrorEnum.COMMENT_NOT_FOUND.getMsg())
         );
         return comment;
     }
 
     @Transactional
-    public void increaseLikes(Long commentId){
+    public void increaseLikes(Long commentId) {
         Comment comment = findCommentbyId(commentId);
         comment.increaseLikes();
     }
 
     @Transactional
-    public void decreaseLikes(Long commentId){
+    public void decreaseLikes(Long commentId) {
         Comment comment = findCommentbyId(commentId);
         comment.decreaseLikes();
     }

@@ -19,18 +19,22 @@ public class CommentController {
     private CommentService commentService;
 
     @PostMapping("/{postId}")
-    public ResponseEntity<CommentResponseDto> createComment(@PathVariable("postId") Long postId, @RequestBody CommentRequestDto commentRequestDto) {
+    public ResponseEntity<CommentResponseDto> createComment(@PathVariable("postId") Long postId,
+        @RequestBody CommentRequestDto commentRequestDto) {
         return ResponseEntity.ok().body(commentService.createNewComment(postId, commentRequestDto));
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<List<CommentResponseDto>> getComment(@PathVariable("postId") Long postId) {
+    public ResponseEntity<List<CommentResponseDto>> getComment(
+        @PathVariable("postId") Long postId) {
         return ResponseEntity.ok().body(commentService.getAllComments(postId));
     }
 
     @PutMapping("/{commentId}")
-    public ResponseEntity<CommentResponseDto> updateComment(@PathVariable Long commentId, @RequestBody CommentRequestDto commentRequestDto) {
-        return ResponseEntity.ok().body(commentService.updateExistingComment(commentId, commentRequestDto));
+    public ResponseEntity<CommentResponseDto> updateComment(@PathVariable Long commentId,
+        @RequestBody CommentRequestDto commentRequestDto) {
+        return ResponseEntity.ok()
+            .body(commentService.updateExistingComment(commentId, commentRequestDto));
     }
 
     @DeleteMapping("/{commentId}")
