@@ -9,4 +9,6 @@ public class ProfileResponseDto {
     private Long id;
     private String username;
     private String indroduction;
+    private int postLikeCount;
+    private int commentLikeCount;
 }
