@@ -74,7 +74,8 @@ public class UserService {
         PasswordHistory ph = new PasswordHistory(encodedPassword, savedUser);
         passwordHistoryRepository.save(ph);
 
-        AuthResponseDto responseDto = new AuthResponseDto(savedUser.getId(), savedUser.getUsername());
+        AuthResponseDto responseDto = new AuthResponseDto(savedUser.getId(),
+            savedUser.getUsername());
 
         return ResponseEntity.ok(responseDto);
     }
@@ -103,7 +104,7 @@ public class UserService {
 
         AuthResponseDto responseDto = new AuthResponseDto(user.getId(), user.getUsername());
 
-        return new ResponseEntity<>(responseDto,headers,HttpStatus.OK);
+        return new ResponseEntity<>(responseDto, headers, HttpStatus.OK);
     }
 
     public ResponseEntity<AuthResponseDto> logout(UserDetailsImpl userDetails) {
@@ -214,7 +215,7 @@ public class UserService {
         int commentLikeCount = commentLikeRepository.countAllByUserId(user.getId());
 
         ProfileResponseDto responseDto = new ProfileResponseDto(user.getId(), user.getUsername(),
-            user.getIntroduction(),postLikeCount,commentLikeCount);
+            user.getIntroduction(), postLikeCount, commentLikeCount);
 
         return new ResponseEntity<>(responseDto, headers, HttpStatus.OK);
     }
@@ -226,7 +227,6 @@ public class UserService {
             throw new CustomException(INVALID_TOKEN);
         }
 
-
         String username = jwtUtil.getUsernameFromToken(refreshToken);
         User user = userRepository.findByUsername(username).orElse(null);
 
@@ -234,19 +234,12 @@ public class UserService {
             throw new CustomException(USER_NOT_FOUND);
         }
 
-
         // AccessToken 재발급
         String newAccessToken = jwtUtil.createAccessToken(username);
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + newAccessToken);
 
         return new ResponseEntity<>("Refresh Token 재발급", headers, HttpStatus.OK);
-    }
-
-
-    public User findUserById(Long userId) {
-        return userRepository.findById(userId)
-            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
     }
 
     public ResponseEntity<ProfileResponseDto> getProfile(Long id) {
@@ -282,9 +275,25 @@ public class UserService {
             int postLikeCount = postLikeRepository.countAllByUserId(userid);
             int commentLikeCount = commentLikeRepository.countAllByUserId(userid);
 
-            responseDtoList.add(new ProfileResponseDto(userid, username, introduction,postLikeCount,commentLikeCount));
+            responseDtoList.add(
+                new ProfileResponseDto(userid, username, introduction, postLikeCount,
+                    commentLikeCount));
         }
 
         return ResponseEntity.ok().body(responseDtoList);
     }
+
+
+    public User findUserById(Long userId) {
+        return userRepository.findById(userId)
+            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+    }
+
+    public int getPostLikeCount(Long userId) {
+        return postLikeRepository.countAllByUserId(userId);
+    }
+    public int getCommentLikeCount(Long userId){
+        return commentLikeRepository.countAllByUserId(userId);
+    }
+
 }

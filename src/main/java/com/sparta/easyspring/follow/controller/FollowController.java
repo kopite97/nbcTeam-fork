@@ -1,7 +1,9 @@
 package com.sparta.easyspring.follow.controller;
 
+import com.sparta.easyspring.auth.dto.ProfileResponseDto;
 import com.sparta.easyspring.auth.security.UserDetailsImpl;
 import com.sparta.easyspring.follow.service.FollowService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,17 +14,26 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/follow")
 @RequiredArgsConstructor
 public class FollowController {
+
     private final FollowService followService;
 
     @PostMapping("/{followingId}")
-    public ResponseEntity<String> addFollow(@PathVariable(name = "followingId") Long followingId, @AuthenticationPrincipal UserDetailsImpl userDetails){
-        followService.addFollow(followingId,userDetails.getUser());
+    public ResponseEntity<String> addFollow(@PathVariable(name = "followingId") Long followingId,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        followService.addFollow(followingId, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).body("팔로우 완료");
     }
 
     @DeleteMapping("/{followingId}")
-    public ResponseEntity<String> deleteFollow(@PathVariable(name = "followingId") Long followingId,@AuthenticationPrincipal UserDetailsImpl userDetails){
-        followService.deleteFollow(followingId,userDetails.getUser());
+    public ResponseEntity<String> deleteFollow(@PathVariable(name = "followingId") Long followingId,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        followService.deleteFollow(followingId, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).body("팔로우 취소 완료");
     }
+
+    @GetMapping("/top")
+    public ResponseEntity<List<ProfileResponseDto>> getFollowerRank(){
+        return followService.getFollowerRank();
+    }
+
 }
